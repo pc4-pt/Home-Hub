@@ -1,0 +1,6 @@
+<resources>
+    <color name="bg">#FF0B0D12</color>
+    <style name="Hub" parent="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@color/bg</item>
+    </style>
+</resources>
