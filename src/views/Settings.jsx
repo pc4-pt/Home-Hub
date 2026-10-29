@@ -42,14 +42,15 @@ export default function Settings({ meta, store, total, setRegion, say }) {
             {(meta?.sources || []).map((s) => (
               <tr key={s.source} className={s.ok ? '' : 'bad'}>
                 <td>{s.source}</td>
-                <td>{s.ok ? `${s.kept ?? 0} channels${s.withGuide != null ? ` · ${s.withGuide} with guide` : ''}` : `unavailable (${s.error})`}</td>
+                <td>{!s.ok ? `unavailable (${s.error})` : s.detail ?? `${s.kept ?? 0} channels${s.withGuide != null ? ` · ${s.withGuide} with guide` : ''}`}</td>
               </tr>
             ))}
           </tbody>
         </table>
         <p className="dim">
-          Channels are free, ad-supported or free-to-air streams. Some are limited to the UK or US and won't play from
-          Portugal; after two failed attempts a channel is moved to the end of its list.
+          Channels are free-to-air streams. A daily check hides streams that have failed two checks in a row; it runs
+          from the US, so channels blocked only in Portugal are caught here instead — after two failed attempts on
+          this TV a channel moves to the end of its list.
         </p>
       </section>
 

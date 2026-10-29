@@ -1,0 +1,55 @@
+name: Daily stream check + TV guide
+
+on:
+  schedule:
+    - cron: '23 3 * * *'   # 03:23 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: write   # publish to the "data-latest" release
+  actions: write    # trigger a site rebuild afterwards
+
+jobs:
+  maintain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DATA_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/data-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check streams
+        run: HEALTH_URL="$DATA_URL/health.json" node scripts/check-streams.mjs
+
+      - name: Pick guide sources
+        run: node scripts/epg-channels.mjs
+
+      - name: Get the iptv-org guide grabber
+        run: |
+          git clone --depth 1 https://github.com/iptv-org/epg.git "$RUNNER_TEMP/epg"
+          cd "$RUNNER_TEMP/epg" && npm install --no-audit --no-fund
+
+      - name: Grab two days of listings
+        continue-on-error: true   # some guide sites fail; publish whatever we got
+        timeout-minutes: 90
+        run: |
+          cd "$RUNNER_TEMP/epg"
+          npm run grab --- --channels="$GITHUB_WORKSPACE/data/channels.xml" \
+            --output="$GITHUB_WORKSPACE/data/guide.xml" --days=2 --maxConnections=10
+
+      - name: Publish
+        working-directory: data
+        run: |
+          files="health.json"
+          if [ -s guide.xml ]; then gzip -kf guide.xml; files="$files guide.xml.gz"; fi
+          gh release view data-latest >/dev/null 2>&1 || \
+            gh release create data-latest --title "Channel data" --notes "Generated daily: stream check and TV guide."
+          gh release upload data-latest $files --clobber
+          echo "Published: $files" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Rebuild the site with the new data
+        run: gh workflow run pages.yml --ref "${{ github.ref_name }}"

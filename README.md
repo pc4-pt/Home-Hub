@@ -18,18 +18,25 @@ The project has three parts:
 
 ## Where the channels come from
 
-The channels are free, ad-supported (FAST) or free-to-air streams that their owners publish openly: Pluto TV, Samsung TV Plus, Plex and The Roku Channel (playlists and guides via [i.mjh.nz](https://github.com/matthuisman/i.mjh.nz)), plus UK/US channels from [iptv-org](https://github.com/iptv-org/iptv) with its blocklist applied and geo-blocked streams skipped. BBC, ITV, Channel 4 and 5 are deliberately left out. Use their own apps from the Apps row for those.
+The channels are UK/US free-to-air streams from [iptv-org](https://github.com/iptv-org/iptv), filtered to film, box-set and sport channels. iptv-org's blocklist is applied and geo-blocked streams are skipped. BBC, ITV, Channel 4 and 5 are deliberately left out; use their own apps from the Apps row. The ad-supported services (Pluto TV, Plex, Tubi, The Roku Channel) are reached through their official apps, which appear in Your apps when installed. The third-party playlists for those services were withdrawn after a DMCA notice. `sources.json` still accepts any M3U + XMLTV source you're entitled to use.
+
+Two scheduled jobs keep the list honest:
+
+| Workflow | When | What |
+|---|---|---|
+| *Daily stream check + TV guide* (`maintain.yml`) | 03:23 UTC | Probes every stream (playlist, then first variant). A stream is hidden after failing **2 checks in a row**. Then it runs iptv-org's guide grabber for the working channels and publishes `health.json` + `guide.xml.gz` to the `data-latest` release. Finally it triggers a site rebuild. |
+| *Hub site + channel catalogue* (`pages.yml`) | every 4 h | Builds the catalogue from iptv-org, minus hidden streams, plus the latest guide, and deploys the site. |
 
 What to expect:
-- **Some channels won't play from Portugal.** Many FAST streams are limited to the UK or US. When a channel fails twice, it moves to the end of its list and is marked "Not playing from here". You can reset this in Settings.
-- **Premium sport isn't in here.** Premier League, Sky, TNT, DAZN and the like are paid. The Sport row is replays, highlights, extreme sports, fight archives, darts and similar.
-- **The upstream lists change.** If a source breaks, the catalogue build skips it and Settings → Catalogue shows which one. Edit `sources.json` to add or remove sources.
+- **The stream check runs on GitHub's US servers.** It catches dead and broken streams, but not ones blocked only in Portugal. The app handles those: two failed plays on the TV and the channel moves to the end of its list, marked "Not playing from here". You can reset this in Settings.
+- **Guide coverage is partial.** Only channels that iptv-org can map to a listings site get programmes. The rest show as "live".
+- **Premium sport isn't in here.** Premier League, Sky, TNT, DAZN and the like are paid.
 
 ## Setup (one-off, about 20 minutes)
 
 1. **Create a GitHub repo and push this folder to `main`.** Make it public: GitHub Pages is free for public repos, and the Fire TV needs to download the APK without logging in. Nothing secret lives in this repo.
 2. **Turn on Pages:** go to Settings → Pages → Source and choose **GitHub Actions**.
-3. **Build the site:** go to Actions → *Hub site + channel catalogue* → Run workflow. When it finishes, your hub is at `https://<you>.github.io/<repo>/`. Open it in a desktop browser and use the arrow keys, Enter, Esc and `f` to check it.
+3. **Build the site:** go to Actions → *Daily stream check + TV guide* → Run workflow. The first run takes 20–60 minutes, and the site rebuilds itself when it finishes. (*Hub site + channel catalogue* on its own also works, just without the stream check and guide.) When it finishes, your hub is at `https://<you>.github.io/<repo>/`. Open it in a desktop browser and use the arrow keys, Enter, Esc and `f` to check it.
 4. **(Recommended) Signing key:** run `scripts/make-keystore.sh` once, from inside the repo with the `gh` CLI logged in. Without it, each APK build is signed differently and you'd have to uninstall before every update.
 5. **Build the Fire TV app:** go to Actions → *Fire TV app (APK)* → Run workflow. It publishes `home-hub.apk` on a release called `apk-latest`. To point the app somewhere other than GitHub Pages (later, a box on your LAN), set a repository variable `HUB_URL`.
 6. **Install it on the Fire TV:**

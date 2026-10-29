@@ -1,40 +1,35 @@
 {
   "_comment": "Free, legitimately published UK/US streams. Edit freely; failing sources are skipped and reported in channels.json.",
-  "regions": ["gb", "us"],
-  "categories": ["films", "boxsets", "sport"],
-  "guideHours": 12,
-  "fast": [
-    {
-      "id": "pluto",
-      "name": "Pluto TV",
-      "m3u": "https://i.mjh.nz/PlutoTV/{region}.m3u8",
-      "epg": "https://i.mjh.nz/PlutoTV/{region}.xml.gz"
-    },
-    {
-      "id": "samsung",
-      "name": "Samsung TV Plus",
-      "m3u": "https://i.mjh.nz/SamsungTVPlus/{region}.m3u8",
-      "epg": "https://i.mjh.nz/SamsungTVPlus/{region}.xml.gz"
-    },
-    {
-      "id": "plex",
-      "name": "Plex",
-      "m3u": "https://i.mjh.nz/Plex/{region}.m3u8",
-      "epg": "https://i.mjh.nz/Plex/{region}.xml.gz"
-    },
-    {
-      "id": "roku",
-      "name": "The Roku Channel",
-      "regions": ["us"],
-      "m3u": "https://i.mjh.nz/Roku/{region}.m3u8",
-      "epg": "https://i.mjh.nz/Roku/{region}.xml.gz"
-    }
+  "regions": [
+    "gb",
+    "us"
   ],
+  "categories": [
+    "films",
+    "boxsets",
+    "sport"
+  ],
+  "guideHours": 12,
+  "_fast_comment": "Generic M3U + XMLTV sources: { id, name, m3u, epg, regions? } with {region} placeholders. The i.mjh.nz playlists were withdrawn after a DMCA notice (2024).",
+  "fast": [],
   "iptvOrg": {
     "enabled": true,
     "api": "https://iptv-org.github.io/api",
-    "countries": { "gb": ["UK", "GB"], "us": ["US"] },
-    "categoryMap": { "movies": "films", "series": "boxsets", "classic": "boxsets", "sports": "sport" },
+    "countries": {
+      "gb": [
+        "UK",
+        "GB"
+      ],
+      "us": [
+        "US"
+      ]
+    },
+    "categoryMap": {
+      "movies": "films",
+      "series": "boxsets",
+      "classic": "boxsets",
+      "sports": "sport"
+    },
     "skipGeoBlocked": true
   },
   "exclude": {

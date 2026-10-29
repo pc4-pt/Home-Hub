@@ -27,6 +27,9 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - name: Build channel catalogue
+        env:
+          HEALTH_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/data-latest/health.json
+          EPG_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/data-latest/guide.xml.gz
         run: node scripts/build-catalog.mjs
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
