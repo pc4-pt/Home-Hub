@@ -23,6 +23,7 @@ export async function loadIptvOrg(cfg) {
   for (const s of streams) {
     if (!s.channel || !s.url) continue;
     if (io.skipGeoBlocked && /geo/i.test(s.label || '')) continue;
+    if (io.skipIpHosts !== false && isIpHost(s.url)) continue;
     const prev = byChannel.get(s.channel);
     if (!prev || (!s.label && prev.label) || (!!s.label === !!prev.label && q(s) > q(prev))) byChannel.set(s.channel, s);
   }
@@ -46,6 +47,16 @@ export async function loadIptvOrg(cfg) {
     }
   }
   return { channels, guides };
+}
+
+/** Streams served from a bare IP address are usually personal restreams, not the broadcaster. */
+export function isIpHost(url) {
+  try {
+    const host = new URL(url).hostname;
+    return /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.startsWith('[');
+  } catch {
+    return true; // unparseable URL: skip it too
+  }
 }
 
 /** Streams are tracked by URL so a replaced stream starts with a clean record. */

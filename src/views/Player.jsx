@@ -26,11 +26,13 @@ export default function Player({ list, index, setIndex, guide, now, registerKeys
     const fail = (why) => {
       if (dead) return;
       dead = true;
-      onFail(ch.id);
       const mixed = location.protocol === 'https:' && ch.url.startsWith('http:');
-      setErr(mixed ? 'This stream is plain HTTP, which browsers block on a secure page. It will play in the Fire TV app.'
-        : ch.ref || ch.ua ? 'This stream needs special request headers that only the Fire TV app can send.'
-        : `This channel won't play from here right now (${why}). It may be restricted to the UK or US.`);
+      const headers = !!(ch.ref || ch.ua);
+      // Only count failures that might also happen on the TV.
+      if (!mixed && !headers) onFail(ch.id);
+      setErr(mixed ? 'This stream uses plain HTTP, which browsers block on a secure page. It should still play on the Fire TV.'
+        : headers ? 'This stream needs request headers that a browser can\'t send. It should still play on the Fire TV.'
+        : `This browser couldn't play the stream (${why}). Browsers block many streams that play fine on the Fire TV or in VLC, so this isn't proof it's unavailable.`);
     };
     v.onplaying = () => onPlaying(ch.id);
     v.onerror = () => fail('media error');

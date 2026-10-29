@@ -30,7 +30,8 @@
       "classic": "boxsets",
       "sports": "sport"
     },
-    "skipGeoBlocked": true
+    "skipGeoBlocked": true,
+    "skipIpHosts": true
   },
   "exclude": {
     "_comment": "UK public-service broadcasters: watch via their own apps (geo-locked, licence rules).",
